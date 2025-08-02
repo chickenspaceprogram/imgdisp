@@ -1,9 +1,6 @@
-#define MIN_MAJOR_OS_VER 1
-#define MIN_MINOR_OS_VER 13
+#define SPEED_MAJOR_OS 1
+#define SPEED_MINOR_OS 13
 
-
-os_err_str:
-	.db "ERR: Old OS", 0
 
 init:
 ; avoid Done message
@@ -11,18 +8,21 @@ init:
 
 ; check OS version
 	bcall(_GetBaseVer)
-	sub	MIN_MAJOR_OS_VER
-	jp	M, end_chk_osver
-	jr	NZ, end_chk_osver
+	sub	SPEED_MAJOR_OS
+	jp	M, no_set_speed
+	jr	NZ, set_speed
 
 	ld	A, B
-	sub	MIN_MINOR_OS_VER
-end_chk_osver:
-; print err string and exit if needed
-	ld	HL, os_err_str
-	jp	M, exit_msg ; os version too old, exit
+	sub	SPEED_MINOR_OS
+	jp	M, no_set_speed
 
+set_speed:
+	ld	A, $FF
+	bcall(_SetExSpeed)
+
+no_set_speed:
 	ret
+; end init
 
 ; Displays a message and exits
 ; 
@@ -56,6 +56,17 @@ exit_msg:
 exit:
 	ld	SP, (stack_base)
 	ret
+; end exit_msg
+
+; delays enough for it to be safe to access the LCD memory
+lcd_busy_safe:
+	push	AF
+	call _LCD_BUSY_QUICK
+	pop	AF
+	ret
+
+#define SET_LCD_ROW(row) ld A, %80 + row \ call lcd_busy_safe \ out (lcdinstport), A
+#define SET_LCD_COL
 
 press_key_str:
 	.db "Press any key...", 0
