@@ -8,9 +8,16 @@ start:
 	ld	(stack_base), SP
 	call	init
 
+mainloop:
+	call display_img
+	call exit_on_keypress
+	jr	mainloop
+
+
+#include "disp_routines.asm"
+#include "utils.asm"
+
 stack_base:
 	.dw	0
-
-#include "utils.asm"
 
 .end

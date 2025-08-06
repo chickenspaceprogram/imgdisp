@@ -1,0 +1,20 @@
+
+IMGDISP fileformat:
+
+Put all this in an appvar:
+
+4-byte Magic Number, big-endian:
+0x69 0x6d 0x67 0x64 (ASCII string "imgd")
+
+Version byte:
+0x00	- Uncompressed, 3-bit grayscale
+
+
+Version 0x00 encoding:
+
+7 sequential 96x64 bitarrays
+
+- Each bitarray gets displayed in sequence to the screen
+after each bitarray is displayed, bcall(_GetCSC) and if nonzero keep looping
+
+
